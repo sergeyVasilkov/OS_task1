@@ -2,6 +2,8 @@
 #include <fcntl.h>
 #include <cstdarg>
 #include <errno.h>
+#include <cstring>
+#include <iostream>
 
 #define    MAXLINE    4096
 
@@ -29,27 +31,65 @@ void err_sys(const char* fmt, ...)
     exit(1);
 }
 
+//const int EXIT_TRIGGER = 1;
+//const int CONTINUE_TRIGGER = 2;
+//
+// int checkExit() {
+//     std::string userInput;
+//     while (true) {
+//         std::cout << "Do you want exit? (Yes/No)\n";
+//         std::cin >> userInput;
+//         if (userInput == "Yes" || userInput == "yes") {
+//             return EXIT_TRIGGER;
+//         } else if (userInput == "No" || userInput == "no") {
+//             return CONTINUE_TRIGGER;
+//         } else {
+//             std::cout << "Incorrect answer, try again !\n";
+//             continue;
+//         }
+//     }
+// }
 
-char buf1[] = "abcdefghij";
-char buf2[] = "ABCDEFGHIJ";
-int main()
-{
+ void inputData (int fd ,int size, char data[]){
+     if (size != strlen(data)) {
+        std::cout<<"Size and Data length are not equal !\n";
+     } else{
+         if (write(fd, data, size) != size) {
+             err_sys("write buf1 error");
+         }
+     }
+ }
+
+void lseekUpdate(int fd,int size){
+    if (lseek(fd, size, SEEK_SET) == -1) {
+        err_sys("lseek error");
+    }
+}
+
+
+int main(int argc, char** argv){
+
+    const std::string DATA_INPUT = "-d";
+    const std::string LSEEK_UPDATE = "-l";
+
     int fd;
     if ((fd = creat("file.txt", FILE_MODE)) < 0) {
         err_sys("creat error");
     }
-    if (write(fd, buf1, 10) != 10) {
-        err_sys("write buf1 error");
-    }
-/* теперь текущая позиция = 10 */
-    if (lseek(fd, 500000, SEEK_SET) == -1) {
-        err_sys("lseek error");
-    }
-/* теперь текущая позиция = 500000 */
-    if (write(fd, buf2, 10) != 10) {
-        err_sys("write buf2 error ");
-    }
-/* теперь текущая позиция = 500000 */
 
+    for(int i=0;i<argc ;i++){
+       puts(argv[i]);
+    }
+
+    int count = 0;
+    while(count<argc){
+        if (std::string(argv[count]) == DATA_INPUT){
+            inputData(fd,std::stoi(argv[count+1]),argv[count+2]);
+            count+=3;
+        } else if(std::string(argv[count])==LSEEK_UPDATE){
+            lseekUpdate(fd,std::stoi(argv[count+1]));
+            count+=2;
+        } else count++;
+    }
      exit(0);
 }
