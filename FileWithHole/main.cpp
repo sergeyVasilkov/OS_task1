@@ -31,25 +31,6 @@ void err_sys(const char* fmt, ...)
     exit(1);
 }
 
-//const int EXIT_TRIGGER = 1;
-//const int CONTINUE_TRIGGER = 2;
-//
-// int checkExit() {
-//     std::string userInput;
-//     while (true) {
-//         std::cout << "Do you want exit? (Yes/No)\n";
-//         std::cin >> userInput;
-//         if (userInput == "Yes" || userInput == "yes") {
-//             return EXIT_TRIGGER;
-//         } else if (userInput == "No" || userInput == "no") {
-//             return CONTINUE_TRIGGER;
-//         } else {
-//             std::cout << "Incorrect answer, try again !\n";
-//             continue;
-//         }
-//     }
-// }
-
  void inputData (int fd ,int size, char data[]){
      if (size != strlen(data)) {
         std::cout<<"Size and Data length are not equal !\n";
