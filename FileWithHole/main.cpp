@@ -31,9 +31,25 @@ void err_sys(const char* fmt, ...)
     exit(1);
 }
 
- void inputData (int fd ,int size, char data[]){
-     if (size != strlen(data)) {
-        std::cout<<"Size and Data length are not equal !\n";
+ void inputData (int fd ,char sizeChar[], char data[]){
+int size =0;
+    try {
+        size = std::stoi(sizeChar);
+     }
+    catch (std::invalid_argument &e){
+        std::cout<<e.what();
+        return;
+    }
+    catch(std::out_of_range &e){
+        std::cout<<e.what();
+        return;
+    }
+
+    if(size <= 0){
+        std::cout<<"Size equal or less zero"<<std::endl;
+        return;
+    } else if (size != strlen(data)) {
+        std::cout<<std::endl<<"Size and Data length are not equal !\n";
      } else{
          if (write(fd, data, size) != size) {
              err_sys("write buf1 error");
@@ -41,7 +57,17 @@ void err_sys(const char* fmt, ...)
      }
  }
 
-void lseekUpdate(int fd,int size){
+void lseekUpdate(int fd,char sizeChar[]){
+    int size =0;
+    try {
+        size = std::stoi(sizeChar);
+    }
+    catch (std::invalid_argument &e){
+        std::cout<<e.what();
+    }
+    catch(std::out_of_range &e){
+        std::cout<<e.what();
+    }
     if (lseek(fd, size, SEEK_SET) == -1) {
         err_sys("lseek error");
     }
@@ -49,6 +75,10 @@ void lseekUpdate(int fd,int size){
 
 
 int main(int argc, char** argv){
+    if(argc < 3){
+        std::cout<<"less than two arguments"<<std::endl;
+        exit(0);
+    }
 
     const std::string DATA_INPUT = "-d";
     const std::string LSEEK_UPDATE = "-l";
@@ -58,18 +88,38 @@ int main(int argc, char** argv){
         err_sys("creat error");
     }
 
-    for(int i=0;i<argc ;i++){
-       puts(argv[i]);
-    }
 
     int count = 0;
+
     while(count<argc){
         if (std::string(argv[count]) == DATA_INPUT){
-            inputData(fd,std::stoi(argv[count+1]),argv[count+2]);
-            count+=3;
+            if(count+2<=argc) {
+                if (std::string(argv[count + 1]) == "-l" || std::string(argv[count + 2]) == "-l") {
+                    std::cout << "Incorrect arguments" << std::endl;
+                    break;
+                } else {
+                    inputData(fd, argv[count + 1], argv[count + 2]);
+                    count += 3;
+                }
+            }
+            else {
+                std::cout<<"Potential arguments for dataInput out of range"<<std::endl;
+                break;
+            }
         } else if(std::string(argv[count])==LSEEK_UPDATE){
-            lseekUpdate(fd,std::stoi(argv[count+1]));
-            count+=2;
+            if(count+2<argc) {
+                if (std::string(argv[count + 1]) == "-d") {
+                    std::cout << "Incorrect arguments" << std::endl;
+                    break;
+                } else {
+                    lseekUpdate(fd, argv[count + 1]);
+                    count += 2;
+                }
+            }
+            else{
+                std::cout<<"Potential arguments for lseek out of range"<<std::endl;
+                break;
+            }
         } else count++;
     }
      exit(0);
